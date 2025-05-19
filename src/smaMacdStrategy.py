@@ -1,7 +1,8 @@
 from backtesting import Backtest, Strategy
 from backtesting.lib import crossover
-from backtesting.test import SMA, EURUSD
+import pandas as pd
 import talib
+from data_loader import load_yahoo_finance_data
 
 class SmaMacdStrategy(Strategy):
     # Define parameters
@@ -46,18 +47,30 @@ class SmaMacdStrategy(Strategy):
             # enter position
             self.sell(size=0.3)
 
-bt = Backtest(
-    EURUSD,
-    SmaMacdStrategy,
-    cash=100000,
-    commission=.002,
-    exclusive_orders=True,
-)
-output = bt.run()
-bt.plot(
-    plot_volume=False,
-    plot_pl=True,
-    plot_drawdown=False,
-    plot_equity=True,
-    plot_return=False,
-)
+# Define SMA function since we're no longer importing from backtesting.test
+def SMA(array, n):
+    """Simple Moving Average"""
+    return pd.Series(array).rolling(n).mean()
+
+if __name__ == "__main__":
+    # Load data using the data_loader module
+    symbol = "AAPL"  # Apple Inc.
+    start_date = "2020-01-01"
+    end_date = "2023-12-31"
+    data = load_yahoo_finance_data(symbol, start_date, end_date)
+    
+    bt = Backtest(
+        data,
+        SmaMacdStrategy,
+        cash=100000,
+        commission=.002,
+        exclusive_orders=True,
+    )
+    output = bt.run()
+    bt.plot(
+        plot_volume=False,
+        plot_pl=True,
+        plot_drawdown=False,
+        plot_equity=True,
+        plot_return=False,
+    )

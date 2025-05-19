@@ -1,7 +1,7 @@
 from backtesting import Backtest, Strategy
 from backtesting.lib import crossover
-
-from backtesting.test import SMA, EURUSD
+import pandas as pd
+from data_loader import load_yahoo_finance_data
 
 class SmaCross(Strategy):
     n1 = 10
@@ -18,8 +18,18 @@ class SmaCross(Strategy):
         elif crossover(self.sma2, self.sma1):
             self.sell()
 
+# Define SMA function since we're no longer importing from backtesting.test
+def SMA(array, n):
+    """Simple Moving Average"""
+    return pd.Series(array).rolling(n).mean()
+
+# Load price data using the data_loader module
+symbol = "AAPL"  # Apple Inc.
+data = load_yahoo_finance_data(symbol, period="59d", interval="5m")
+
+# Run backtest
 bt = Backtest(
-    EURUSD,
+    data,
     SmaCross,
     cash=100000,
     commission=.002,
@@ -28,9 +38,7 @@ bt = Backtest(
 output = bt.run()
 bt.plot(plot_volume=False)
 
-# n1 & n2 are class variables, so different combinations can be tested to optimise the strategy.
-# In the following code, we specify a range of numbers to test for each, and specify a `constraint` lambda to help
-# rule out any invalid scenarios (e.g. SMA1 should always be less than SMA2)
+# Optimize strategy parameters
 stats = bt.optimize(n1=range(5, 30, 5),
                     n2=range(10, 70, 5),
                     maximize='Equity Final [$]',
