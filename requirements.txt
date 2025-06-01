@@ -1,4 +1,6 @@
-backtesting
-bokeh<3.0
-numpy==1.23.5
-ta-lib
+backtesting>=0.3.3
+pandas>=1.5.0
+numpy>=1.21.0
+yfinance>=0.2.18
+openai>=1.0.0
+matplotlib>=3.6.0
